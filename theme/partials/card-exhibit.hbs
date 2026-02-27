@@ -1,0 +1,16 @@
+<a class="card-exhibit" href="{{url}}">
+  <div class="ce-thumb">
+    {{#if feature_image}}
+      <img src="{{feature_image}}" alt="{{title}}" class="ce-thumb-img">
+    {{else}}
+      <div class="ce-thumb-fallback">{{@number}}</div>
+    {{/if}}
+  </div>
+  <div class="ce-info">
+    <div class="ce-num-label">EXHIBIT {{@number}}</div>
+    <div class="ce-kicker">{{#if primary_tag}}{{primary_tag.name}}{{/if}}</div>
+    <h3 class="ce-title">{{title}}</h3>
+    <div class="ce-meta">{{date format="YYYY.MM.DD"}}</div>
+  </div>
+  <div class="ce-arrow">→</div>
+</a>
