@@ -1,6 +1,7 @@
 import GhostAdminAPI from '@tryghost/admin-api';
 import OpenAI from 'openai';
 import { config } from 'dotenv';
+import * as readline from 'readline';
 config();
 
 const ghost = new GhostAdminAPI({
@@ -14,15 +15,23 @@ const ai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+function ask(question) {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise(resolve => rl.question(question, ans => { rl.close(); resolve(ans.trim()); }));
+}
+
 async function generateUI(slug) {
   console.log(`[1/4] 拉取文章: ${slug}`);
   const post = await ghost.posts.read(
     { slug },
     { formats: ['html'], include: 'tags,authors' }
   );
+  console.log(`      标题: "${post.title}"`);
 
-  console.log(`[2/4] 构造 prompt: "${post.title}"`);
-  const prompt = buildPrompt(post);
+  const styleHint = await ask('\n风格描述（直接回车使用默认风格）: ');
+
+  console.log(`\n[2/4] 构造 prompt...`);
+  const prompt = buildPrompt(post, styleHint);
 
   console.log(`[3/4] 调用 AI 生成 HTML...`);
   const completion = await ai.chat.completions.create({
@@ -32,7 +41,6 @@ async function generateUI(slug) {
   });
 
   const raw = completion.choices[0].message.content;
-  // 提取代码块内容（如果 AI 包了 ```html ... ```）
   const generatedHTML = raw.replace(/^```html\n?/, '').replace(/\n?```$/, '').trim();
 
   console.log(`[4/4] 写回 Ghost...`);
@@ -44,12 +52,17 @@ async function generateUI(slug) {
     tags: [...existingTags, { name: '#custom-ui' }]
   });
 
-  console.log(`✓ 完成: ${post.title}`);
+  console.log(`\n✓ 完成: ${post.title}`);
   console.log(`  预览: ${process.env.GHOST_URL}/${post.slug}/`);
 }
 
-function buildPrompt(post) {
+function buildPrompt(post, styleHint) {
   const tags = post.tags?.filter(t => !t.name.startsWith('#')).map(t => t.name).join(', ') || '无';
+  const defaultStyle = `设计感强、艺术感强、扁平风格、信息密度高、大胆的排版——大字标题、强对比色、克制的留白、网格感布局`;
+  const styleDesc = styleHint
+    ? `用户指定风格：${styleHint}\n同时保持整体基调：${defaultStyle}`
+    : `默认风格：${defaultStyle}`;
+
   return `你是一个前端艺术家，专门为博客文章创作独特的视觉页面。
 
 请为以下文章生成一个完整的、风格独特的 HTML 页面片段。
@@ -62,6 +75,9 @@ function buildPrompt(post) {
 ${post.html}
 ---
 
+风格要求：
+${styleDesc}
+
 输出要求：
 1. 只输出 <style> 块 + HTML 结构，不要 <!DOCTYPE>、<html>、<head>、<body> 标签
 2. 风格必须与文章的情绪、主题深度结合——技术文章可以用终端/代码风格，情感文章可以用诗意排版，旅行文章可以用地图/明信片风格等
@@ -69,8 +85,7 @@ ${post.html}
 4. 必须包含一个返回首页的链接：<a href="/">← 返回展览大厅</a>
 5. 字体使用 Google Fonts，在 <style> 里用 @import 引入
 6. 页面要完整可读，移动端友好
-7. 颜色方案与文章情绪匹配，不要千篇一律的深色背景
-8. 只输出代码，不要任何解释文字`;
+7. 只输出代码，不要任何解释文字`;
 }
 
 // CLI 入口
