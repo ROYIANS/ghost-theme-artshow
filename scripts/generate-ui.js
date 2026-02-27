@@ -96,7 +96,23 @@ async function modeGenerate(slug, site, post) {
   }
 }
 
-// ── 模式 B：直接上传本地 HTML 回写 ──
+function savePrompt(slug, prompt) {
+  const dir = resolve('./previews');
+  mkdirSync(dir, { recursive: true });
+  const file = join(dir, `${slug}.prompt.md`);
+  writeFileSync(file, prompt, 'utf-8');
+  return file;
+}
+
+// ── 模式 C：只生成 prompt，保存为 md 文件 ──
+async function modePromptOnly(slug, site, post) {
+  const styleHint = await ask('风格描述（直接回车使用默认风格）: ');
+  console.log('\n[3/3] 构造 prompt...');
+  const prompt = buildPrompt(post, site, styleHint);
+  const file = savePrompt(slug, prompt);
+  console.log(`\n✓ Prompt 已保存：`);
+  console.log(`  ${file}`);
+}
 async function modeFile(slug, site, post, filePath) {
   const html = readFileSync(resolve(filePath), 'utf-8')
     // 如果是完整 HTML 文件，提取 body 内容
@@ -115,23 +131,28 @@ async function main() {
   const slug = args[0];
   const fileIdx = args.indexOf('--file');
   const filePath = fileIdx !== -1 ? args[fileIdx + 1] : null;
+  const promptOnly = args.includes('--prompt-only');
 
   if (!slug) {
     console.log('用法:');
-    console.log('  node generate-ui.js <slug>              AI 生成，本地预览后确认回写');
-    console.log('  node generate-ui.js <slug> --file <path>  直接上传本地 HTML 回写');
+    console.log('  node generate-ui.js <slug>                    AI 生成，本地预览后确认回写');
+    console.log('  node generate-ui.js <slug> --file <path>      直接上传本地 HTML 回写');
+    console.log('  node generate-ui.js <slug> --prompt-only      只生成 prompt，保存为 md 文件');
     process.exit(1);
   }
 
-  console.log('[1/5] 拉取站点信息...');
+  const steps = promptOnly || filePath ? 3 : 5;
+  console.log(`[1/${steps}] 拉取站点信息...`);
   const site = await fetchSite();
   console.log(`      站点: ${site.title} (${site.url})`);
 
-  console.log(`[2/5] 拉取文章: ${slug}`);
+  console.log(`[2/${steps}] 拉取文章: ${slug}`);
   const post = await ghost.posts.read({ slug }, { formats: ['html'], include: 'tags,authors' });
   console.log(`      标题: "${post.title}"\n`);
 
-  if (filePath) {
+  if (promptOnly) {
+    await modePromptOnly(slug, site, post);
+  } else if (filePath) {
     await modeFile(slug, site, post, filePath);
   } else {
     await modeGenerate(slug, site, post);
