@@ -6,7 +6,7 @@
     "generate": "node generate-ui.js"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.39.0",
+    "openai": "^4.77.0",
     "@tryghost/admin-api": "^1.13.11",
     "dotenv": "^16.4.7"
   }

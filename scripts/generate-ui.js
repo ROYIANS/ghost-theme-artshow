@@ -1,5 +1,5 @@
 import GhostAdminAPI from '@tryghost/admin-api';
-import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
 import { config } from 'dotenv';
 config();
 
@@ -9,7 +9,10 @@ const ghost = new GhostAdminAPI({
   version: 'v5.0'
 });
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const ai = new OpenAI({
+  baseURL: process.env.OPENAI_BASE_URL,
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 async function generateUI(slug) {
   console.log(`[1/4] 拉取文章: ${slug}`);
@@ -21,14 +24,14 @@ async function generateUI(slug) {
   console.log(`[2/4] 构造 prompt: "${post.title}"`);
   const prompt = buildPrompt(post);
 
-  console.log(`[3/4] 调用 Claude 生成 HTML...`);
-  const msg = await anthropic.messages.create({
-    model: 'claude-opus-4-6',
+  console.log(`[3/4] 调用 AI 生成 HTML...`);
+  const completion = await ai.chat.completions.create({
+    model: process.env.OPENAI_MODEL || 'gpt-4o',
     max_tokens: 8192,
     messages: [{ role: 'user', content: prompt }]
   });
 
-  const raw = msg.content[0].text;
+  const raw = completion.choices[0].message.content;
   // 提取代码块内容（如果 AI 包了 ```html ... ```）
   const generatedHTML = raw.replace(/^```html\n?/, '').replace(/\n?```$/, '').trim();
 
