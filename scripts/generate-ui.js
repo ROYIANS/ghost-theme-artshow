@@ -68,11 +68,11 @@ async function writeBack(post, html) {
 
 // ── 模式 A：AI 生成 → 本地预览 → 确认回写 ──
 async function modeGenerate(slug, site, post) {
-  const styleHint = await ask('风格描述（直接回车使用默认风格）: ');
-  console.log('\n[3/5] 构造 prompt...');
+  const styleHint = await askStyleWithRecommend(post, '[3/6]');
+  console.log('\n[4/6] 构造 prompt...');
   const prompt = buildPrompt(post, site, styleHint);
 
-  console.log('[4/5] 调用 AI 生成 HTML...');
+  console.log('[5/6] 调用 AI 生成 HTML...');
   const completion = await ai.chat.completions.create({
     model: process.env.OPENAI_MODEL || 'gpt-4o',
     max_tokens: 8192,
@@ -82,7 +82,7 @@ async function modeGenerate(slug, site, post) {
   const html = raw.replace(/^```html\n?/, '').replace(/\n?```$/, '').trim();
 
   const previewFile = savePreview(slug, html, prompt);
-  console.log(`\n[5/5] 预览文件已生成：`);
+  console.log(`\n[6/6] 预览文件已生成：`);
   console.log(`      ${previewFile}`);
   console.log(`      用浏览器打开确认效果\n`);
 
@@ -106,8 +106,8 @@ function savePrompt(slug, prompt) {
 
 // ── 模式 C：只生成 prompt，保存为 md 文件 ──
 async function modePromptOnly(slug, site, post) {
-  const styleHint = await ask('风格描述（直接回车使用默认风格）: ');
-  console.log('\n[3/3] 构造 prompt...');
+  const styleHint = await askStyleWithRecommend(post, '[3/4]');
+  console.log('\n[4/4] 构造 prompt...');
   const prompt = buildPrompt(post, site, styleHint);
   const file = savePrompt(slug, prompt);
   console.log(`\n✓ Prompt 已保存：`);
@@ -141,7 +141,7 @@ async function main() {
     process.exit(1);
   }
 
-  const steps = promptOnly || filePath ? 3 : 5;
+  const steps = promptOnly ? 4 : filePath ? 3 : 6;
   console.log(`[1/${steps}] 拉取站点信息...`);
   const site = await fetchSite();
   console.log(`      站点: ${site.title} (${site.url})`);
@@ -157,6 +157,55 @@ async function main() {
   } else {
     await modeGenerate(slug, site, post);
   }
+}
+
+async function recommendStyle(post) {
+  const tags = post.tags?.filter(t => !t.name.startsWith('#')).map(t => t.name).join(', ') || '无';
+  const prompt = `你是一个前端设计顾问。请根据以下博客文章的内容，推荐一个最合适的整体视觉风格。
+
+文章标题：${post.title}
+文章分类：${tags}
+文章摘要：${post.custom_excerpt || post.excerpt || ''}
+文章正文（前500字）：
+${(post.html || '').replace(/<[^>]+>/g, '').slice(0, 500)}
+
+请按以下格式输出，不要输出任何其他内容：
+
+【风格分析】
+<一两句话，解释为什么推荐这个风格>
+
+【推荐关键词】
+<逗号分隔的风格关键词，可直接用于描述整体视觉风格，不涉及具体布局>`;
+
+  const completion = await ai.chat.completions.create({
+    model: process.env.OPENAI_MODEL || 'gpt-4o',
+    max_tokens: 300,
+    messages: [{ role: 'user', content: prompt }]
+  });
+  const content = completion.choices?.[0]?.message?.content;
+  if (!content) return '';
+  return content.trim();
+}
+
+async function askStyleWithRecommend(post, stepLabel) {
+  console.log(`${stepLabel} 分析文章风格...`);
+  let recommendation = '';
+  try {
+    recommendation = await recommendStyle(post);
+  } catch (e) {
+    console.warn('  风格推荐失败，跳过：', e.message);
+  }
+
+  // 提取【推荐关键词】行作为默认值
+  const keywordsMatch = recommendation.match(/【推荐关键词】\s*\n([\s\S]*?)(?:\n【|$)/);
+  const defaultKeywords = keywordsMatch ? keywordsMatch[1].trim() : '';
+
+  console.log('\n' + '─'.repeat(50));
+  console.log(recommendation);
+  console.log('─'.repeat(50) + '\n');
+
+  const input = await ask(`风格描述（直接回车使用推荐风格，输入内容则覆盖）: `);
+  return input || defaultKeywords;
 }
 
 function buildPrompt(post, site, styleHint) {
