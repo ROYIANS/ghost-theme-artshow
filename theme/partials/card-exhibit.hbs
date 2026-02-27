@@ -1,16 +1,23 @@
 <a class="card-exhibit" href="{{url}}">
-  <div class="ce-thumb">
+  <div class="ce-bg">
     {{#if feature_image}}
-      <img src="{{feature_image}}" alt="{{title}}" class="ce-thumb-img">
+      <img src="{{feature_image}}" alt="{{title}}" class="ce-bg-img">
     {{else}}
-      <div class="ce-thumb-fallback">{{@number}}</div>
+      <div class="ce-bg-fallback">{{title}}</div>
     {{/if}}
   </div>
-  <div class="ce-info">
-    <div class="ce-num-label">EXHIBIT {{@number}}</div>
-    <div class="ce-kicker">{{#if primary_tag}}{{primary_tag.name}}{{/if}}</div>
+  <div class="ce-overlay"></div>
+  <div class="ce-placard">
+    <div class="ce-header">
+      <span class="ce-num">NO.{{@number}}</span>
+      {{#if primary_tag}}<span class="ce-tag">{{primary_tag.name}}</span>{{/if}}
+    </div>
     <h3 class="ce-title">{{title}}</h3>
-    <div class="ce-meta">{{date format="YYYY.MM.DD"}}</div>
+    {{#if custom_excerpt}}
+      <p class="ce-excerpt">{{custom_excerpt}}</p>
+    {{else}}
+      <p class="ce-excerpt">{{excerpt words="20"}}</p>
+    {{/if}}
+    <div class="ce-date">{{date format="YYYY.MM.DD"}}</div>
   </div>
-  <div class="ce-arrow">→</div>
 </a>
