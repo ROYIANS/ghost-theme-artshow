@@ -32,8 +32,7 @@
   </div>
 
   <div class="hero-right">
-    {{#get "posts" limit="1" filter="featured:true"}}
-      {{#foreach posts}}
+    {{#foreach posts limit="1"}}
       <div class="featured-exhibit">
         <div class="fe-bg">
           {{#if feature_image}}
@@ -44,7 +43,7 @@
           <div class="fe-bg-accent"></div>
         </div>
         <div class="fe-overlay"></div>
-        <span class="fe-corner-tag">FEATURED</span>
+        <span class="fe-corner-tag">{{#if featured}}FEATURED{{else}}LATEST{{/if}}</span>
         <div class="fe-num">NO.001</div>
         <div class="fe-placard">
           <div class="fep-kicker">{{#if primary_tag}}{{primary_tag.name}}{{else}}EXHIBIT{{/if}}</div>
@@ -52,25 +51,7 @@
           <div class="fep-meta">{{date format="YYYY.MM.DD"}}</div>
         </div>
       </div>
-      {{/foreach}}
-    {{else}}
-      {{#foreach posts limit="1"}}
-      <div class="featured-exhibit">
-        <div class="fe-bg">
-          <div class="fe-bg-type">{{title}}</div>
-          <div class="fe-bg-accent"></div>
-        </div>
-        <div class="fe-overlay"></div>
-        <span class="fe-corner-tag">LATEST</span>
-        <div class="fe-num">NO.001</div>
-        <div class="fe-placard">
-          <div class="fep-kicker">{{#if primary_tag}}{{primary_tag.name}}{{else}}EXHIBIT{{/if}}</div>
-          <h2 class="fep-title"><a href="{{url}}">{{title}}</a></h2>
-          <div class="fep-meta">{{date format="YYYY.MM.DD"}}</div>
-        </div>
-      </div>
-      {{/foreach}}
-    {{/get}}
+    {{/foreach}}
 
     <div class="fe-rooms">
       {{#get "tags" limit="4"}}
@@ -103,19 +84,9 @@
 
     {{#foreach posts}}
       {{#if @first}}
-        {{> "partials/card-wide"}}
+        {{> "card-wide"}}
       {{else}}
-        {{#if (lt @index 3)}}
-          {{#if (is @index 1)}}
-          <div class="aw-grid">
-            {{> "partials/card-grid"}}
-          {{else}}
-            {{> "partials/card-grid"}}
-          </div>
-          {{/if}}
-        {{else}}
-          {{> "partials/card-row"}}
-        {{/if}}
+        {{> "card-row"}}
       {{/if}}
     {{/foreach}}
 

@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小梦岛 — 圈圈的写作展览</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Unbounded:wght@200;400;700;900&family=IBM+Plex+Mono:ital,wght@0,300;0,700;1,300&family=Noto+Sans+SC:wght@300;400;900&display=swap" rel="stylesheet">
+
+<style>
+/* ══════════════════════════════════════════
+   SYSTEM — 地下画廊 · Underground Gallery
+
+   不是白墙展馆。是深夜、霓虹、颜料。
+   颜色：深黑底 + 5种高饱和爆破色
+   布局：对角线、溢出、碰撞、意外
+══════════════════════════════════════════ */
+:root {
+  --void:    #0c0b09;    /* 最深的底 */
+  --dark:    #141310;
+  --dark2:   #1e1c18;
+  --dark3:   #2a2822;
+
+  --acid:    #d4f23c;    /* 酸性黄绿 */
+  --neon:    #ff3cac;    /* 霓虹粉红 */
+  --cyan:    #3cf2e8;    /* 电子青 */
+  --amber:   #f2a43c;    /* 琥珀橙 */
+  --violet:  #7c3cf2;    /* 暴力紫 */
+
+  --ghost:   rgba(255,255,255,0.12);
+  --ghost2:  rgba(255,255,255,0.06);
+  --ghost3:  rgba(255,255,255,0.04);
+  --text:    rgba(255,255,255,0.88);
+  --text2:   rgba(255,255,255,0.5);
+  --text3:   rgba(255,255,255,0.25);
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+
+body {
+  background: var(--void);
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 300;
+  line-height: 1.65;
+  font-size: 13px;
+  overflow-x: hidden;
+  cursor: crosshair;
+}
+
+/* ══ NOISE OVERLAY on body ══ */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  opacity: .025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px;
+  pointer-events: none;
+}
+
+/* ══════════════════════════
+   HEADER — 展览入口
+══════════════════════════ */
+.site-header {
+  position: sticky; top: 0; z-index: 100;
+  height: 50px;
+  display: flex; align-items: stretch;
+  border-bottom: 1px solid var(--ghost);
+  background: rgba(12,11,9,.92);
+  backdrop-filter: blur(16px);
+}
+.sh-logo {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 28px; border-right: 1px solid var(--ghost);
+  flex-shrink: 0;
+}
+.sh-logo-mark {
+  width: 26px; height: 26px;
+  border: 1.5px solid var(--acid);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Bebas Neue', sans-serif; font-size: 15px;
+  color: var(--acid); flex-shrink: 0;
+  box-shadow: 0 0 8px rgba(212,242,60,.3);
+}
+.sh-logo-text {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 11px; font-weight: 400; letter-spacing: .05em;
+  color: var(--text); line-height: 1.2;
+}
+.sh-logo-text small {
+  display: block; font-size: 8px; letter-spacing: .15em;
+  color: var(--text3); font-family: 'IBM Plex Mono', monospace;
+  font-weight: 300; text-transform: uppercase;
+}
+.sh-nav {
+  display: flex; list-style: none; align-items: stretch;
+}
+.sh-nav li {
+  display: flex; align-items: center; padding: 0 20px;
+  font-size: 9px; letter-spacing: .25em; text-transform: uppercase;
+  color: var(--text3); border-right: 1px solid var(--ghost2);
+  cursor: crosshair; transition: .15s;
+}
+.sh-nav li:hover { color: var(--acid); }
+.sh-nav li.on { color: var(--text); }
+.sh-right {
+  margin-left: auto; display: flex; align-items: stretch;
+  border-left: 1px solid var(--ghost);
+}
+.sh-action {
+  display: flex; align-items: center; padding: 0 20px; gap: 8px;
+  font-size: 9px; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--text3); cursor: crosshair; border-right: 1px solid var(--ghost2);
+  transition: .15s;
+}
+.sh-action:hover { color: var(--acid); }
+.sh-action:last-child { border-right: none; }
+
+/* ══════════════════════════
+   HERO — 全屏展览海报
+══════════════════════════ */
+.hero {
+  min-height: calc(100vh - 50px);
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  border-bottom: 1px solid var(--ghost);
+}
+
+/* grid lines backdrop */
+.hero::before {
+  content: '';
+  position: absolute; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(var(--ghost2) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ghost2) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* colour blob backgrounds */
+.hero::after {
+  content: '';
+  position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 55% 45% at 20% 30%, rgba(212,242,60,.07) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 50% at 75% 70%, rgba(255,60,172,.07) 0%, transparent 60%),
+    radial-gradient(ellipse 30% 40% at 55% 15%, rgba(60,242,232,.05) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+/* ── HERO LEFT ── */
+.hero-left {
+  padding: 64px 60px 56px;
+  display: flex; flex-direction: column; justify-content: space-between;
+  border-right: 1px solid var(--ghost);
+  position: relative; z-index: 2;
+}
+
+.hl-season {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 9px; letter-spacing: .35em; text-transform: uppercase; color: var(--text3);
+}
+.hl-season-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--acid);
+  box-shadow: 0 0 6px var(--acid); animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 6px var(--acid); }
+  50% { box-shadow: 0 0 14px var(--acid), 0 0 24px rgba(212,242,60,.4); }
+}
+
+.hero-exhibition-title {
+  position: relative;
+}
+.het-oversize {
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 900;
+  font-size: clamp(64px, 9vw, 130px);
+  line-height: .88;
+  letter-spacing: -.03em;
+  color: var(--text);
+  display: block;
+}
+.het-oversize.acid { color: var(--acid); }
+.het-oversize.ghost-stroke {
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255,255,255,.15);
+}
+
+/* diagonal accent line */
+.het-line {
+  position: absolute; right: -20px; top: 50%;
+  width: 2px; height: 120%; transform-origin: top;
+  background: linear-gradient(to bottom, transparent, var(--acid), transparent);
+  transform: translateY(-50%) rotate(15deg);
+  opacity: .4;
+}
+
+.hero-desc {
+  font-family: 'Noto Sans SC', sans-serif; font-weight: 300;
+  font-size: 14px; line-height: 1.9; color: var(--text2);
+  max-width: 440px;
+  border-left: 2px solid var(--acid);
+  padding-left: 18px;
+}
+
+.hero-stats {
+  display: flex; gap: 0;
+  border: 1px solid var(--ghost);
+  width: fit-content;
+}
+.hs {
+  padding: 12px 24px; border-right: 1px solid var(--ghost);
+}
+.hs:last-child { border-right: none; }
+.hs-n {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 40px; line-height: 1; color: var(--text);
+}
+.hs-n.acid { color: var(--acid); }
+.hs-l { font-size: 8px; letter-spacing: .2em; text-transform: uppercase; color: var(--text3); }
+
+/* ── HERO RIGHT ── */
+.hero-right {
+  position: relative; z-index: 2;
+  display: flex; flex-direction: column;
+}
+
+/* featured exhibit card — takes up most of right side */
+.featured-exhibit {
+  flex: 1;
+  position: relative; overflow: hidden;
+  cursor: crosshair;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  border-bottom: 1px solid var(--ghost);
+}
+.fe-bg {
+  position: absolute; inset: 0;
+  background: #f2f0eb;
+  overflow: hidden;
+}
+/* brutalist mini-canvas inside featured */
+.fe-bg-type {
+  position: absolute; inset: 0; z-index: 1;
+  display: flex; align-items: flex-start; justify-content: flex-start;
+  padding: 20px 16px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(56px, 10vw, 120px);
+  line-height: .85; letter-spacing: -.02em;
+  color: transparent; -webkit-text-stroke: 1.5px rgba(13,13,11,.12);
+  user-select: none; pointer-events: none;
+}
+.fe-bg-accent {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 4px; background: var(--acid);
+  box-shadow: 0 -4px 20px rgba(212,242,60,.5);
+}
+/* overlay gradient so placard is readable */
+.fe-overlay {
+  position: absolute; inset: 0; z-index: 2;
+  background: linear-gradient(to top, rgba(12,11,9,.85) 0%, transparent 50%);
+}
+.fe-corner-tag {
+  position: absolute; top: 16px; right: 16px; z-index: 4;
+  font-size: 8px; letter-spacing: .25em; text-transform: uppercase;
+  background: var(--acid); color: var(--void);
+  padding: 4px 12px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.fe-num {
+  position: absolute; top: 16px; left: 16px; z-index: 4;
+  font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: var(--text3);
+}
+.fe-placard {
+  position: relative; z-index: 4;
+  padding: 20px 24px;
+}
+.fep-kicker {
+  font-size: 8px; letter-spacing: .3em; text-transform: uppercase;
+  color: var(--acid); margin-bottom: 8px;
+  display: flex; align-items: center; gap: 10px;
+}
+.fep-kicker::before { content:''; width:12px; height:1px; background:var(--acid); }
+.fep-title {
+  font-family: 'Unbounded', sans-serif; font-weight: 700;
+  font-size: clamp(15px, 2vw, 22px); line-height: 1.2; letter-spacing: -.02em;
+  color: var(--text); margin-bottom: 6px;
+}
+.fep-meta { font-size: 9px; color: var(--text3); letter-spacing: .1em; }
+
+/* exhibit rooms below featured */
+.fe-rooms {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  border-top: 1px solid var(--ghost);
+}
+.fer {
+  padding: 14px 16px; border-right: 1px solid var(--ghost);
+  cursor: crosshair; transition: .15s; position: relative; overflow: hidden;
+}
+.fer:last-child { border-right: none; }
+.fer::before {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+  height: 2px; opacity: 0; transition: opacity .2s;
+}
+.fer:hover { background: var(--dark2); }
+.fer:hover::before { opacity: 1; }
+.fer.r-b::before { background: var(--acid); }
+.fer.r-e::before { background: var(--amber); }
+.fer.r-a::before { background: var(--violet); }
+.fer.r-j::before { background: #7ec4a8; }
+.fer-dot { width: 8px; height: 8px; border-radius: 50%; margin-bottom: 8px; }
+.fer-name { font-size: 9px; letter-spacing: .15em; text-transform: uppercase; color: var(--text3); line-height: 1.5; }
+.fer-count { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--text2); line-height: 1; margin-top: 4px; }
+
+/* ══════════════════════════
+   GALLERY GRID — 展品列表
+══════════════════════════ */
+.gallery-section {
+  display: grid; grid-template-columns: 1fr 320px;
+  border-top: 1px solid var(--ghost);
+}
+
+.gallery-grid { border-right: 1px solid var(--ghost); }
+
+.gg-header {
+  padding: 16px 32px;
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid var(--ghost);
+}
+.gg-h-label { font-size: 9px; letter-spacing: .35em; text-transform: uppercase; color: var(--text3); }
+.gg-h-filter {
+  display: flex; gap: 0;
+}
+.gg-f {
+  font-size: 9px; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--text3); padding: 4px 14px; border: 1px solid var(--ghost2);
+  margin-left: -1px; cursor: crosshair; transition: .15s;
+}
+.gg-f:hover { color: var(--acid); border-color: var(--acid); z-index: 1; position: relative; }
+.gg-f.on { color: var(--void); background: var(--acid); border-color: var(--acid); z-index: 1; position: relative; }
+
+/* ── ARTWORK CARDS ── */
+
+/* === WIDE FEATURE (full width, dramatic) === */
+.aw-wide {
+  display: grid; grid-template-columns: 2fr 1fr;
+  border-bottom: 1px solid var(--ghost);
+  cursor: crosshair; overflow: hidden; transition: .15s;
+}
+.aw-wide:hover { background: var(--dark2); }
+.aw-wide:hover .aww-arrow { opacity: 1; transform: translateX(0); }
+
+.aww-main { padding: 36px 32px; border-right: 1px solid var(--ghost); }
+.aww-kicker {
+  font-size: 9px; letter-spacing: .3em; text-transform: uppercase;
+  margin-bottom: 12px; display: flex; align-items: center; gap: 10px;
+}
+.aww-kicker::before { content:''; height: 1px; width: 14px; }
+.aww-title {
+  font-family: 'Unbounded', sans-serif; font-weight: 700;
+  font-size: clamp(18px, 2.2vw, 28px); line-height: 1.1; letter-spacing: -.03em;
+  margin-bottom: 12px;
+}
+.aww-excerpt {
+  font-family: 'Noto Sans SC', sans-serif; font-weight: 300;
+  font-size: 13px; line-height: 1.9; color: var(--text2);
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.aww-foot { margin-top: 20px; display: flex; align-items: center; gap: 14px; }
+.aww-date { font-size: 9px; letter-spacing: .15em; color: var(--text3); }
+.aww-tag {
+  font-size: 8px; letter-spacing: .2em; text-transform: uppercase;
+  padding: 3px 10px; border: 1px solid;
+}
+.aww-read { font-size: 9px; color: var(--text3); margin-left: auto; }
+.aww-side {
+  position: relative; overflow: hidden; min-height: 200px;
+  display: flex; flex-direction: column; justify-content: flex-end;
+}
+.aww-side-canvas { position: absolute; inset: 0; }
+.aww-side-info {
+  position: relative; z-index: 2;
+  padding: 16px 20px;
+  border-top: 1px solid var(--ghost);
+  background: rgba(12,11,9,.6); backdrop-filter: blur(8px);
+}
+.awsi-l { font-size: 8px; letter-spacing: .3em; text-transform: uppercase; color: var(--text3); margin-bottom: 4px; }
+.awsi-s { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: .05em; }
+.aww-arrow {
+  position: absolute; right: 228px; top: 50%;
+  transform: translateX(10px) translateY(-50%);
+  font-size: 22px; opacity: 0; color: var(--text2);
+  transition: all .2s;
+}
+
+/* === STANDARD CARD (2-col grid) === */
+.aw-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--ghost);
+}
+.aw-card {
+  padding: 28px 28px 24px;
+  border-right: 1px solid var(--ghost);
+  cursor: crosshair; transition: .15s;
+  position: relative; overflow: hidden;
+}
+.aw-card:last-child { border-right: none; }
+.aw-card:hover { background: var(--dark2); }
+.aw-card:hover .ac-num { opacity: .08; }
+
+/* giant ghost number */
+.ac-num {
+  position: absolute; right: -10px; bottom: -16px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 96px; line-height: 1;
+  letter-spacing: -.03em; opacity: .04;
+  transition: opacity .2s; pointer-events: none; user-select: none;
+  color: var(--text);
+}
+.ac-stripe {
+  height: 2px; width: 48px; margin-bottom: 14px;
+}
+.ac-kicker {
+  font-size: 8px; letter-spacing: .3em; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 10px;
+}
+.ac-title {
+  font-family: 'Unbounded', sans-serif; font-weight: 700;
+  font-size: clamp(14px, 1.5vw, 18px); line-height: 1.2; letter-spacing: -.02em;
+  margin-bottom: 10px; color: var(--text);
+}
+.ac-excerpt {
+  font-family: 'Noto Sans SC', sans-serif; font-weight: 300;
+  font-size: 12px; line-height: 1.85; color: var(--text2);
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.ac-foot { margin-top: 16px; display: flex; align-items: center; gap: 10px; }
+.ac-date { font-size: 8px; letter-spacing: .1em; color: var(--text3); }
+.ac-tag {
+  font-size: 8px; letter-spacing: .18em; text-transform: uppercase;
+  padding: 2px 8px; border: 1px solid; margin-left: auto;
+}
+.ac-read { font-size: 8px; color: var(--text3); }
+
+/* === HORIZONTAL SMALL CARD === */
+.aw-row {
+  display: grid; grid-template-columns: 100px 1fr;
+  border-bottom: 1px solid var(--ghost);
+  cursor: crosshair; transition: .15s; overflow: hidden;
+}
+.aw-row:hover { background: var(--dark2); }
+.aw-row:hover .ar-enter { opacity: 1; }
+.ar-thumb {
+  border-right: 1px solid var(--ghost);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Bebas Neue', sans-serif; font-size: 36px;
+  position: relative; overflow: hidden;
+}
+.ar-thumb-text { position: relative; z-index: 1; }
+.ar-body { padding: 18px 24px; position: relative; }
+.ar-kicker { font-size: 8px; letter-spacing: .25em; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
+.ar-title {
+  font-family: 'Unbounded', sans-serif; font-weight: 700;
+  font-size: 14px; line-height: 1.2; letter-spacing: -.02em; margin-bottom: 6px; color: var(--text);
+}
+.ar-meta { font-size: 9px; color: var(--text3); }
+.ar-enter { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); opacity: 0; transition: .2s; color: var(--text3); font-size: 18px; }
+
+/* COMING SOON card */
+.aw-card.coming { opacity: .4; }
+
+/* ══════════════════════════
+   SIDEBAR — 策展人面板
+══════════════════════════ */
+.sidebar-panel { }
+
+.sp-block { border-bottom: 1px solid var(--ghost); padding: 24px; }
+.spb-label {
+  font-size: 8px; letter-spacing: .35em; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+.spb-label::before { content:''; width:10px; height:1px; background:var(--text3); }
+
+/* curator */
+.sp-avatar {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--acid), var(--cyan));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Unbounded', sans-serif; font-weight: 900; font-size: 20px;
+  color: var(--void); margin-bottom: 14px;
+  box-shadow: 0 0 20px rgba(212,242,60,.2);
+}
+.sp-name { font-family: 'Unbounded', sans-serif; font-weight: 400; font-size: 16px; letter-spacing: -.01em; margin-bottom: 4px; }
+.sp-role { font-size: 8px; letter-spacing: .25em; text-transform: uppercase; color: var(--acid); margin-bottom: 12px; }
+.sp-bio { font-family: 'Noto Sans SC', sans-serif; font-weight: 300; font-size: 12px; line-height: 1.85; color: var(--text2); }
+
+/* style rooms visual legend */
+.sp-rooms { display: flex; flex-direction: column; gap: 10px; }
+.spr-item {
+  display: flex; align-items: center; gap: 10px;
+  cursor: crosshair; padding: 8px; transition: .15s;
+  border: 1px solid transparent;
+}
+.spr-item:hover { background: var(--dark2); border-color: var(--ghost); }
+.spr-swatch {
+  width: 32px; height: 32px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; font-family: 'Bebas Neue', sans-serif;
+}
+.spr-info { flex: 1; }
+.spr-name { font-size: 12px; color: var(--text); margin-bottom: 1px; font-family: 'Unbounded', sans-serif; font-weight: 400; font-size: 11px; letter-spacing: -.01em; }
+.spr-sub { font-size: 8px; letter-spacing: .1em; color: var(--text3); }
+.spr-n { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--text3); line-height: 1; }
+
+/* themes */
+.sp-themes { display: flex; flex-wrap: wrap; gap: 6px; }
+.spt {
+  font-size: 10px; letter-spacing: .1em; color: var(--text2);
+  border: 1px solid var(--ghost); padding: 5px 12px; cursor: crosshair; transition: .15s;
+}
+.spt:hover { border-color: var(--acid); color: var(--acid); }
+.spt.on { background: var(--acid); color: var(--void); border-color: var(--acid); }
+
+/* archive */
+.sp-archive {}
+.spa-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid var(--ghost2);
+  cursor: crosshair;
+}
+.spa-item:last-child { border-bottom: none; }
+.spa-item:hover .spa-month { color: var(--acid); }
+.spa-month { font-size: 12px; color: var(--text2); transition: .15s; }
+.spa-n { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--text3); }
+
+/* institutions */
+.sp-inst {}
+.spi-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; border-bottom: 1px solid var(--ghost2);
+  cursor: crosshair;
+}
+.spi-item:last-child { border-bottom: none; }
+.spi-name { font-size: 12px; color: var(--text2); margin-bottom: 1px; }
+.spi-desc { font-size: 9px; color: var(--text3); }
+.spi-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ghost); flex-shrink: 0; }
+.spi-dot.live { background: var(--acid); box-shadow: 0 0 6px var(--acid); }
+
+/* subscribe */
+.sp-sub {}
+.sp-sub p { font-family: 'Noto Sans SC', sans-serif; font-weight: 300; font-size: 12px; line-height: 1.8; color: var(--text2); margin-bottom: 12px; }
+.sp-sub-row { display: flex; }
+.sp-input {
+  flex: 1; background: var(--dark2); border: 1px solid var(--ghost);
+  color: var(--text); padding: 9px 12px; font-size: 11px;
+  font-family: 'IBM Plex Mono', monospace; outline: none;
+}
+.sp-input:focus { border-color: var(--acid); }
+.sp-btn {
+  background: var(--acid); color: var(--void); border: none;
+  padding: 9px 16px; font-size: 8px; letter-spacing: .2em; text-transform: uppercase;
+  font-family: 'IBM Plex Mono', monospace; cursor: crosshair; font-weight: 700;
+  transition: .15s;
+}
+.sp-btn:hover { background: var(--cyan); }
+
+/* ══════════════════════════
+   PAGINATION
+══════════════════════════ */
+.pager {
+  display: flex; align-items: stretch; height: 48px;
+  border-top: 1px solid var(--ghost); border-bottom: 1px solid var(--ghost);
+}
+.pg-prev, .pg-next {
+  display: flex; align-items: center; padding: 0 28px; gap: 10px;
+  font-size: 9px; letter-spacing: .25em; text-transform: uppercase;
+  color: var(--text3); cursor: crosshair; transition: .15s;
+}
+.pg-next { border-left: 1px solid var(--ghost); margin-left: auto; }
+.pg-prev:hover, .pg-next:hover { color: var(--acid); }
+.pg-nums { display: flex; align-items: stretch; border-left: 1px solid var(--ghost); border-right: 1px solid var(--ghost); }
+.pg-n {
+  display: flex; align-items: center; padding: 0 16px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--text3);
+  border-right: 1px solid var(--ghost2); cursor: crosshair; transition: .15s;
+}
+.pg-n:hover { color: var(--acid); }
+.pg-n.on { color: var(--acid); }
+.pg-n:last-child { border-right: none; }
+
+/* ══════════════════════════
+   MANIFESTO BAND
+══════════════════════════ */
+.manifesto-band {
+  border-top: 1px solid var(--ghost);
+  height: 36px; display: flex; align-items: center; overflow: hidden;
+  background: linear-gradient(90deg, var(--void) 0%, rgba(212,242,60,.04) 50%, var(--void) 100%);
+  position: relative;
+}
+.manifesto-band::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--acid) 40%, var(--neon) 70%, transparent 100%);
+  opacity: .3;
+}
+.mb-tag {
+  padding: 0 20px; font-size: 8px; letter-spacing: .3em; text-transform: uppercase;
+  color: var(--acid); white-space: nowrap; flex-shrink: 0;
+  border-right: 1px solid var(--ghost); height: 100%; display: flex; align-items: center;
+}
+.mb-scroll { flex: 1; overflow: hidden; }
+.mb-inner {
+  display: inline-block; white-space: nowrap;
+  font-size: 8px; letter-spacing: .25em; text-transform: uppercase; color: var(--text3);
+  font-family: 'IBM Plex Mono', monospace;
+  animation: scroll 34s linear infinite;
+}
+@keyframes scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+/* ══════════════════════════
+   FOOTER
+══════════════════════════ */
+.grand-footer {
+  border-top: 1px solid var(--ghost);
+  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+}
+.gf-col { padding: 40px 32px; border-right: 1px solid var(--ghost); }
+.gf-col:last-child { border-right: none; }
+.gf-label { font-size: 8px; letter-spacing: .35em; text-transform: uppercase; color: var(--text3); margin-bottom: 20px; }
+.gf-site {
+  font-family: 'Unbounded', sans-serif; font-weight: 900;
+  font-size: 20px; letter-spacing: -.02em; color: var(--text); margin-bottom: 10px;
+  line-height: 1.1;
+}
+.gf-site span { color: var(--acid); }
+.gf-tagline { font-family: 'Noto Sans SC', sans-serif; font-weight: 300; font-size: 13px; line-height: 1.85; color: var(--text2); }
+.gf-list { list-style: none; }
+.gf-list li {
+  padding: 7px 0; border-bottom: 1px solid var(--ghost2);
+  font-size: 12px; color: var(--text2); cursor: crosshair; transition: .15s;
+  display: flex; align-items: center; gap: 8px;
+}
+.gf-list li:hover { color: var(--acid); }
+.gf-list li:last-child { border-bottom: none; }
+.gf-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
+.gf-copy { font-size: 9px; color: var(--text3); margin-top: 24px; line-height: 1.8; letter-spacing: .05em; }
+
+/* ══════════════════════════
+   ANIMATIONS
+══════════════════════════ */
+@keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+@keyframes slideLeft { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+
+.hero-left { animation: slideUp .8s ease forwards; }
+.hero-right { animation: slideLeft .8s ease .15s forwards; opacity: 0; }
+.gg-header { animation: slideUp .5s ease .2s forwards; opacity: 0; }
+.aw-wide { animation: slideUp .5s ease .25s forwards; opacity: 0; }
+.aw-grid { animation: slideUp .5s ease .35s forwards; opacity: 0; }
+
+/* ══════════════════════════
+   RESPONSIVE
+══════════════════════════ */
+@media(max-width:1100px){
+  .gallery-section { grid-template-columns: 1fr; }
+  .sidebar-panel { display: grid; grid-template-columns: repeat(2,1fr); border-top: 1px solid var(--ghost); }
+  .sp-block { border-right: 1px solid var(--ghost); }
+  .grand-footer { grid-template-columns: 1fr 1fr; }
+}
+@media(max-width:760px){
+  .hero { grid-template-columns: 1fr; }
+  .hero-right { display: none; }
+  .aw-wide { grid-template-columns: 1fr; }
+  .aww-side { display: none; }
+  .aw-grid { grid-template-columns: 1fr; }
+  .grand-footer { grid-template-columns: 1fr; }
+  .sidebar-panel { grid-template-columns: 1fr; }
+  .sh-nav li:nth-child(n+3) { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<header class="site-header">
+  <div class="sh-logo">
+    <div class="sh-logo-mark">梦</div>
+    <div class="sh-logo-text">
+      小梦岛
+      <small>Xiaomeng Island · Est. 2018</small>
+    </div>
+  </div>
+  <ul class="sh-nav">
+    <li class="on">全部展厅</li>
+    <li>日常碎片</li>
+    <li>观影读书</li>
+    <li>思考与碎碎念</li>
+    <li>旅行足迹</li>
+    <li>岛主的话</li>
+  </ul>
+  <div class="sh-right">
+    <div class="sh-action">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      搜索
+    </div>
+    <div class="sh-action">登岛须知</div>
+  </div>
+</header>
+
+<!-- ══ HERO ══ -->
+<section class="hero">
+
+  <!-- LEFT: 展览标题 -->
+  <div class="hero-left">
+    <div class="hl-season">
+      <div class="hl-season-dot"></div>
+      写了第 7 年了 &nbsp;·&nbsp; 2018 — 2025 &nbsp;·&nbsp; 还在更新中
+    </div>
+
+    <div class="hero-exhibition-title">
+      <span class="het-oversize">小</span>
+      <span class="het-oversize acid">梦</span>
+      <span class="het-oversize ghost-stroke">岛</span>
+      <div class="het-line"></div>
+    </div>
+
+    <p class="hero-desc">
+      北方某个小城市来的圈圈，从 2018 年开始在这里写东西。这里是她的岛——不大，但是自己的。岛上有她看过的、想过的、路过的、记录下来的一切。<strong style="color:var(--text);">每篇文章都有自己的展厅，欢迎随意逛。</strong>
+    </p>
+
+    <div class="hero-stats">
+      <div class="hs"><div class="hs-n acid">7</div><div class="hs-l">年了</div></div>
+      <div class="hs"><div class="hs-n">∞</div><div class="hs-l">篇故事</div></div>
+      <div class="hs"><div class="hs-n">1</div><div class="hs-l">个岛主</div></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: 最新展品 + 展厅快览 -->
+  <div class="hero-right">
+    <div class="featured-exhibit">
+      <div class="fe-bg">
+        <div class="fe-bg-type">TYPE<br>IS<br>FORM<br>NO.047</div>
+        <div class="fe-bg-accent"></div>
+      </div>
+      <div class="fe-overlay"></div>
+      <div class="fe-corner-tag">最近更新 · Latest</div>
+      <div class="fe-num">No.047 · 思考与碎碎念</div>
+      <div class="fe-placard">
+        <div class="fep-kicker">哲学 · 思考 · 2025.03.14</div>
+        <div class="fep-title">交互哲学：从宇宙本体到应用实践的完整框架</div>
+        <div class="fep-meta">文字 · 约 18 分钟 · 圈圈写的</div>
+      </div>
+    </div>
+
+    <div class="fe-rooms">
+      <div class="fer r-b">
+        <div class="fer-dot" style="background:var(--acid);box-shadow:0 0 6px var(--acid);"></div>
+        <div class="fer-name">日常<br>碎片</div>
+        <div class="fer-count" style="color:var(--acid);">138</div>
+      </div>
+      <div class="fer r-e">
+        <div class="fer-dot" style="background:var(--amber);"></div>
+        <div class="fer-name">观影<br>读书</div>
+        <div class="fer-count" style="color:var(--amber);">64</div>
+      </div>
+      <div class="fer r-a">
+        <div class="fer-dot" style="background:var(--violet);"></div>
+        <div class="fer-name">思考<br>碎碎念</div>
+        <div class="fer-count" style="color:var(--violet);">47</div>
+      </div>
+      <div class="fer r-j">
+        <div class="fer-dot" style="background:#7ec4a8;"></div>
+        <div class="fer-name">旅行<br>足迹</div>
+        <div class="fer-count" style="color:#7ec4a8;">29</div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ══ GALLERY SECTION ══ -->
+<div class="gallery-section">
+  <div class="gallery-grid">
+
+    <div class="gg-header">
+      <span class="gg-h-label">岛上的一切 · 278 篇</span>
+      <div class="gg-h-filter">
+        <span class="gg-f on">全部</span>
+        <span class="gg-f">日常</span>
+        <span class="gg-f">观影读书</span>
+        <span class="gg-f">思考</span>
+        <span class="gg-f">旅行</span>
+      </div>
+    </div>
+
+    <!-- WIDE FEATURE — 交互哲学 -->
+    <div class="aw-wide">
+      <div class="aww-main">
+        <div class="aww-kicker" style="color:var(--acid);">
+          <span style="background:var(--acid);width:14px;display:block;height:1px;"></span>
+          思考与碎碎念 · 2025.03.14
+        </div>
+        <div class="aww-title">交互哲学：从宇宙本体到应用实践的完整框架</div>
+        <div class="aww-excerpt">
+          "存在即交互"——这是我最近一直在转的一个念头。从物理学的量子测量，到 AI 界面设计，到我们每天和手机的关系。写着写着写长了，变成了一篇有点正经的东西。
+        </div>
+        <div class="aww-foot">
+          <span class="aww-date">2025.03.14</span>
+          <span class="aww-tag" style="color:var(--acid);border-color:rgba(212,242,60,.4);">思考</span>
+          <span class="aww-read">18 min →</span>
+        </div>
+      </div>
+      <div class="aww-side">
+        <div class="aww-side-canvas" style="background:#f2f0eb;">
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,9vw,100px);line-height:.88;color:transparent;-webkit-text-stroke:2px rgba(13,13,11,.2);letter-spacing:-.02em;padding:16px;user-select:none;">TYPE<br>IS<br>FORM</div>
+          <div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--acid);box-shadow:0 -3px 12px var(--acid);"></div>
+        </div>
+        <div class="aww-side-info">
+          <div class="awsi-l">所属展厅</div>
+          <div class="awsi-s" style="color:var(--acid);">思考与碎碎念</div>
+        </div>
+      </div>
+      <div class="aww-arrow">→</div>
+    </div>
+
+    <!-- 2-CARD GRID ROW — 日常 + 观影读书 -->
+    <div class="aw-grid">
+      <div class="aw-card">
+        <div class="ac-num" style="color:var(--amber);">日</div>
+        <div class="ac-stripe" style="background:var(--amber);"></div>
+        <div class="ac-kicker" style="color:rgba(242,164,60,.6);">日常碎片 · 2025.02.28</div>
+        <div class="ac-title">二月份的流水账，以及一只突然出现的猫</div>
+        <div class="ac-excerpt">这个月做了好多梦，大部分都忘了，只记得有一只猫一直跟着我。现实里没有猫。办公室的绿植死了一棵，换了一盆多肉，不知道能活多久。</div>
+        <div class="ac-foot">
+          <span class="ac-date">2025.02.28</span>
+          <span class="ac-tag" style="color:rgba(242,164,60,.7);border-color:rgba(242,164,60,.3);">日常</span>
+          <span class="ac-read">4min</span>
+        </div>
+      </div>
+      <div class="aw-card">
+        <div class="ac-num" style="color:var(--violet);">影</div>
+        <div class="ac-stripe" style="background:var(--violet);box-shadow:0 0 8px rgba(124,60,242,.4);"></div>
+        <div class="ac-kicker" style="color:rgba(124,60,242,.6);">观影读书 · 2025.02.14</div>
+        <div class="ac-title">《坠落的审判》：每段关系都有说不清楚的地方</div>
+        <div class="ac-excerpt">看完很久之后我还在想那个法庭。不是因为案件本身，是因为那些对话——两个人住在一起，但对同一件事的记忆可以差那么多。</div>
+        <div class="ac-foot">
+          <span class="ac-date">2025.02.14</span>
+          <span class="ac-tag" style="color:rgba(124,60,242,.7);border-color:rgba(124,60,242,.3);">观影</span>
+          <span class="ac-read">7min</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- WIDE — 旅行 -->
+    <div class="aw-wide">
+      <div class="aww-main">
+        <div class="aww-kicker" style="color:#7ec4a8;">
+          <span style="background:#7ec4a8;width:14px;display:block;height:1px;"></span>
+          旅行足迹 · 2025.01.30
+        </div>
+        <div class="aww-title">大理三天，以及我为什么没有爱上它</div>
+        <div class="aww-excerpt">
+          所有人都说大理很好。我也觉得很好，但不是那种「啊我要住在这里」的好。洱海很大，风很凉，咖啡很多。第三天下午我坐在路边吃了一碗米线，突然很想回家。
+        </div>
+        <div class="aww-foot">
+          <span class="aww-date">2025.01.30</span>
+          <span class="aww-tag" style="color:#7ec4a8;border-color:rgba(126,196,168,.4);">旅行</span>
+          <span class="aww-read">8 min →</span>
+        </div>
+      </div>
+      <div class="aww-side">
+        <div class="aww-side-canvas" style="background:#0a1f1a;">
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(48px,9vw,100px);color:#7ec4a8;opacity:.2;user-select:none;">洱</div>
+          <div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:#7ec4a8;"></div>
+        </div>
+        <div class="aww-side-info">
+          <div class="awsi-l">所属展厅</div>
+          <div class="awsi-s" style="color:#7ec4a8;">旅行足迹</div>
+        </div>
+      </div>
+      <div class="aww-arrow">→</div>
+    </div>
+
+    <!-- SMALL ROWS -->
+    <div class="aw-row">
+      <div class="ar-thumb" style="background:rgba(242,164,60,.06);color:var(--amber);opacity:.7;">
+        <div class="ar-thumb-text">书</div>
+      </div>
+      <div class="ar-body">
+        <div class="ar-kicker" style="color:rgba(242,164,60,.5);">观影读书 · 2025.01.12</div>
+        <div class="ar-title">读完《我在北京送快递》，哭了两次</div>
+        <div class="ar-meta">2025.01.12 &nbsp;·&nbsp; 5min &nbsp;·&nbsp; 读书</div>
+        <div class="ar-enter">→</div>
+      </div>
+    </div>
+
+    <div class="aw-row">
+      <div class="ar-thumb" style="background:rgba(212,242,60,.05);color:rgba(212,242,60,.4);">
+        <div class="ar-thumb-text" style="font-size:24px;">冬</div>
+      </div>
+      <div class="ar-body">
+        <div class="ar-kicker" style="color:rgba(212,242,60,.4);">日常碎片 · 2025.01.03</div>
+        <div class="ar-title">北方的冬天和我小时候的不一样了</div>
+        <div class="ar-meta">2025.01.03 &nbsp;·&nbsp; 3min &nbsp;·&nbsp; 日常</div>
+        <div class="ar-enter">→</div>
+      </div>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pager">
+      <div class="pg-prev">← 上一批</div>
+      <div class="pg-nums">
+        <div class="pg-n on">1</div>
+        <div class="pg-n">2</div>
+        <div class="pg-n">3</div>
+        <div class="pg-n" style="font-size:14px;color:var(--text3);">…</div>
+        <div class="pg-n">8</div>
+      </div>
+      <div class="pg-next">继续参观 →</div>
+    </div>
+
+  </div><!-- /gallery-grid -->
+
+  <!-- ── CURATOR SIDEBAR ── -->
+  <aside class="sidebar-panel">
+
+    <div class="sp-block">
+      <div class="spb-label">岛主</div>
+      <div class="sp-avatar">圈</div>
+      <div class="sp-name">圈圈</div>
+      <div class="sp-role">岛主 · 1997年冬 · 北方某小城</div>
+      <div class="sp-bio">27 岁，北方来的。2018 年开始在这里写东西，写到现在。没有固定主题，想到什么写什么——生活、电影、旅行、睡前乱想的事。<br><br>欢迎登岛，随便逛。</div>
+    </div>
+
+    <div class="sp-block">
+      <div class="spb-label">展厅分区</div>
+      <div class="sp-rooms">
+        <div class="spr-item">
+          <div class="spr-swatch" style="background:rgba(212,242,60,.1);border:1px solid rgba(212,242,60,.3);color:var(--acid);">日</div>
+          <div class="spr-info"><div class="spr-name">日常碎片</div><div class="spr-sub">流水账 · 心情 · 生活里的小事</div></div>
+          <div class="spr-n" style="color:var(--acid);">138</div>
+        </div>
+        <div class="spr-item">
+          <div class="spr-swatch" style="background:rgba(242,164,60,.1);border:1px solid rgba(242,164,60,.3);color:var(--amber);">影</div>
+          <div class="spr-info"><div class="spr-name">观影读书</div><div class="spr-sub">看完之后想说的话</div></div>
+          <div class="spr-n" style="color:var(--amber);">64</div>
+        </div>
+        <div class="spr-item">
+          <div class="spr-swatch" style="background:rgba(124,60,242,.1);border:1px solid rgba(124,60,242,.3);color:var(--violet);">思</div>
+          <div class="spr-info"><div class="spr-name">思考与碎碎念</div><div class="spr-sub">睡前乱想 · 不成体系</div></div>
+          <div class="spr-n" style="color:var(--violet);">47</div>
+        </div>
+        <div class="spr-item">
+          <div class="spr-swatch" style="background:rgba(126,196,168,.12);border:1px solid rgba(126,196,168,.3);color:#7ec4a8;">旅</div>
+          <div class="spr-info"><div class="spr-name">旅行足迹</div><div class="spr-sub">去过的地方 · 没去成的地方</div></div>
+          <div class="spr-n" style="color:#7ec4a8;">29</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sp-block">
+      <div class="spb-label">常出现的词</div>
+      <div class="sp-themes">
+        <span class="spt on">生活</span>
+        <span class="spt">北方</span>
+        <span class="spt">电影</span>
+        <span class="spt">读书</span>
+        <span class="spt">旅行</span>
+        <span class="spt">睡眠</span>
+        <span class="spt">食物</span>
+        <span class="spt">孤独</span>
+        <span class="spt">AI</span>
+        <span class="spt">城市</span>
+        <span class="spt">梦</span>
+      </div>
+    </div>
+
+    <div class="sp-block">
+      <div class="spb-label">按时间找</div>
+      <div class="sp-archive">
+        <div class="spa-item"><span class="spa-month">2025年 3月</span><span class="spa-n" style="color:var(--acid);">4</span></div>
+        <div class="spa-item"><span class="spa-month">2025年 2月</span><span class="spa-n">7</span></div>
+        <div class="spa-item"><span class="spa-month">2025年 1月</span><span class="spa-n">5</span></div>
+        <div class="spa-item"><span class="spa-month">2024年 12月</span><span class="spa-n">6</span></div>
+        <div class="spa-item"><span class="spa-month">2024年 11月</span><span class="spa-n">8</span></div>
+        <div class="spa-item" style="color:var(--text3);cursor:default;"><span class="spa-month" style="color:var(--text3);">更早 ···</span></div>
+      </div>
+    </div>
+
+    <div class="sp-block">
+      <div class="spb-label" style="display:flex;justify-content:space-between;">
+        友邻的岛
+        <span style="font-size:8px;color:rgba(212,242,60,.5);cursor:crosshair;text-transform:uppercase;letter-spacing:.15em;">来敲门 →</span>
+      </div>
+      <div class="sp-inst">
+        <div class="spi-item">
+          <div><div class="spi-name">一只猫的博客</div><div class="spi-desc">生活 · 摄影 · 很慢的更新频率</div></div>
+          <div class="spi-dot live"></div>
+        </div>
+        <div class="spi-item">
+          <div><div class="spi-name">南方来信</div><div class="spi-desc">广州的朋友 · 吃喝 · 音乐</div></div>
+          <div class="spi-dot live"></div>
+        </div>
+        <div class="spi-item">
+          <div><div class="spi-name">傍晚六点</div><div class="spi-desc">诗 · 随笔 · 不常更新</div></div>
+          <div class="spi-dot"></div>
+        </div>
+        <div class="spi-item">
+          <div><div class="spi-name">L 的废墟</div><div class="spi-desc">电影 · 哲学 · 很难懂</div></div>
+          <div class="spi-dot live"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sp-block" style="border-bottom:none;">
+      <div class="spb-label">漂流瓶</div>
+      <div class="sp-sub">
+        <p>有新东西发出来时我会发一封短信。不定期，大概一个月两三封，不会多。</p>
+        <div class="sp-sub-row">
+          <input class="sp-input" type="email" placeholder="your@email.com">
+          <button class="sp-btn">订阅</button>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<!-- ══ MANIFESTO BAND ══ -->
+<div class="manifesto-band">
+  <div class="mb-tag">岛主的话</div>
+  <div class="mb-scroll">
+    <div class="mb-inner">
+      这里是小梦岛 &nbsp;·&nbsp; 1997 年冬天出生的北方人 &nbsp;·&nbsp; 从 2018 年开始写到现在 &nbsp;·&nbsp; XIAOMENG ISLAND &nbsp;·&nbsp; 写日常 写旅行 写电影 写睡前乱想的事 &nbsp;·&nbsp; 欢迎登岛 随便逛 &nbsp;·&nbsp; WELCOME TO THE ISLAND &nbsp;·&nbsp; 这里是小梦岛 &nbsp;·&nbsp; 1997 年冬天出生的北方人 &nbsp;·&nbsp; 从 2018 年开始写到现在 &nbsp;·&nbsp; XIAOMENG ISLAND &nbsp;·&nbsp; 写日常 写旅行 写电影 写睡前乱想的事 &nbsp;·&nbsp; 欢迎登岛 随便逛 &nbsp;·&nbsp; WELCOME TO THE ISLAND &nbsp;·&nbsp;
+    </div>
+  </div>
+</div>
+
+<!-- ══ FOOTER ══ -->
+<footer class="grand-footer">
+  <div class="gf-col">
+    <div class="gf-label">关于小梦岛</div>
+    <div class="gf-site">小<span>梦</span>岛</div>
+    <div class="gf-tagline">圈圈的个人博客。北方来的，1997年生。从 2018 年开始写，写到现在。没有主题，什么都有——日常、电影、旅行、睡前乱想的事。</div>
+    <div class="gf-copy">岛主：圈圈 &nbsp;·&nbsp; 1997.11.28 &nbsp;·&nbsp; 开岛于 2018 年<br>© 小梦岛 版权所有 · 转载请告知</div>
+  </div>
+  <div class="gf-col">
+    <div class="gf-label">展厅分区</div>
+    <ul class="gf-list">
+      <li><div class="gf-dot" style="background:var(--acid);box-shadow:0 0 4px var(--acid);"></div>日常碎片</li>
+      <li><div class="gf-dot" style="background:var(--amber);"></div>观影读书</li>
+      <li><div class="gf-dot" style="background:var(--violet);"></div>思考与碎碎念</li>
+      <li><div class="gf-dot" style="background:#7ec4a8;"></div>旅行足迹</li>
+      <li><div class="gf-dot" style="background:var(--neon);opacity:.5;"></div>其他</li>
+    </ul>
+  </div>
+  <div class="gf-col">
+    <div class="gf-label">找到我</div>
+    <ul class="gf-list">
+      <li><div class="gf-dot"></div>岛主的话</li>
+      <li><div class="gf-dot"></div>友邻的岛</li>
+      <li><div class="gf-dot"></div>按时间浏览</li>
+      <li><div class="gf-dot"></div>漂流瓶订阅</li>
+      <li><div class="gf-dot"></div>发邮件给圈圈</li>
+    </ul>
+  </div>
+  <div class="gf-col">
+    <div class="gf-label">其他</div>
+    <ul class="gf-list">
+      <li><div class="gf-dot" style="background:var(--acid);opacity:.5;"></div>RSS 订阅</li>
+      <li><div class="gf-dot"></div>登岛须知</li>
+      <li><div class="gf-dot"></div>小梦岛的历史</li>
+      <li><div class="gf-dot"></div>微博 / 豆瓣</li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>
