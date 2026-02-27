@@ -398,6 +398,7 @@ body::before {
   animation: slideUp .5s ease .35s forwards; opacity: 0;
 }
 .exhibit-grid .card-exhibit:nth-child(even) { border-right: none; }
+.exhibit-grid .card-exhibit:last-child { border-right: none; }
 .card-exhibit:hover .ce-bg-img {
   opacity: .8;
   transform: scale(1.03);
