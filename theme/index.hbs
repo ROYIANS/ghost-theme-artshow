@@ -82,25 +82,15 @@
       </div>
     </div>
 
-    {{!-- Main Exhibit: featured post first, fallback to latest --}}
-    {{#get "posts" filter="featured:true" limit="1"}}
-      {{#foreach posts}}
-        {{> "card-main-exhibit"}}
-      {{/foreach}}
-    {{else}}
-      {{#get "posts" limit="1"}}
-        {{#foreach posts}}
-          {{> "card-main-exhibit"}}
-        {{/foreach}}
-      {{/get}}
-    {{/get}}
+    {{!-- Main Exhibit: always the first post in the list --}}
+    {{#foreach posts}}
+      {{#if @first}}{{> "card-main-exhibit"}}{{/if}}
+    {{/foreach}}
 
     {{!-- Regular Exhibits: 2-column grid --}}
     <div class="exhibit-grid">
     {{#foreach posts}}
-      {{#unless @first}}
-        {{> "card-exhibit"}}
-      {{/unless}}
+      {{#unless @first}}{{> "card-exhibit"}}{{/unless}}
     {{/foreach}}
     </div>
 
