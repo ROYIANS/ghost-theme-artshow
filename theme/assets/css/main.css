@@ -164,6 +164,30 @@ body::before {
   color: transparent;
   -webkit-text-stroke: 1.5px rgba(255,255,255,.15);
 }
+.het-oversize.het-cn {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 900;
+  letter-spacing: -.01em;
+}
+.het-subtitle {
+  display: block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .35em;
+  color: var(--text3);
+  text-transform: uppercase;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+.hero-tagline {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--acid);
+  opacity: .7;
+  margin-bottom: 8px;
+}
 .het-line {
   position: absolute; right: -20px; top: 50%;
   width: 2px; height: 120%; transform-origin: top;
