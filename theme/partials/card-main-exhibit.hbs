@@ -1,0 +1,30 @@
+<a class="card-main-exhibit" href="{{url}}">
+  <div class="cme-image-wrap">
+    {{#if feature_image}}
+      <img src="{{feature_image}}" alt="{{title}}" class="cme-image">
+    {{else}}
+      <div class="cme-image-fallback">{{title}}</div>
+    {{/if}}
+    <div class="cme-image-overlay"></div>
+    <span class="cme-corner-tag">{{#if featured}}FEATURED{{else}}LATEST{{/if}}</span>
+  </div>
+
+  <div class="cme-placard">
+    <div class="cme-num">NO.001</div>
+    <div class="cme-kicker">
+      {{#if primary_tag}}{{primary_tag.name}}{{else}}EXHIBIT{{/if}}
+      <span class="cme-kicker-sep">·</span>
+      {{reading_time}}
+    </div>
+    <h2 class="cme-title">{{title}}</h2>
+    {{#if custom_excerpt}}
+      <p class="cme-excerpt">{{custom_excerpt}}</p>
+    {{else if excerpt}}
+      <p class="cme-excerpt">{{excerpt words="30"}}</p>
+    {{/if}}
+    <div class="cme-foot">
+      <span class="cme-date">{{date format="YYYY.MM.DD"}}</span>
+      <span class="cme-enter">→ 进入展览</span>
+    </div>
+  </div>
+</a>
