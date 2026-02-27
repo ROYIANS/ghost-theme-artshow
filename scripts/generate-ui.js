@@ -210,7 +210,7 @@ async function askStyleWithRecommend(post, stepLabel) {
 
 function buildPrompt(post, site, styleHint) {
   const tags = post.tags?.filter(t => !t.name.startsWith('#')).map(t => t.name).join(', ') || '无';
-  const defaultStyle = `设计感强、艺术感强、扁平风格、信息密度高、大胆的排版——大字标题、强对比色、克制的留白、网格感布局`;
+  const defaultStyle = `设计感强、艺术感强、扁平风格、信息密度高、大胆的排版——大字标题、强对比色、克制的留白、杂志感布局`;
   const styleDesc = styleHint
     ? `用户指定风格：${styleHint}\n同时保持整体基调：${defaultStyle}`
     : `默认风格：${defaultStyle}`;

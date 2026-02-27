@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "mcp__memory__read_graph"
+      "mcp__memory__read_graph",
+      "Bash(git:*)"
     ]
   }
 }
