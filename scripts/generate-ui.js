@@ -3,6 +3,8 @@ import OpenAI from 'openai';
 import { config } from 'dotenv';
 import * as readline from 'readline';
 import { createHmac } from 'crypto';
+import { readFileSync, writeFileSync, mkdirSync } from 'fs';
+import { resolve, join } from 'path';
 config();
 
 // Ghost Admin API JWT 签名
@@ -30,53 +32,109 @@ function ask(question) {
   return new Promise(resolve => rl.question(question, ans => { rl.close(); resolve(ans.trim()); }));
 }
 
-async function generateUI(slug) {
-  console.log(`[1/5] 拉取站点信息...`);
+async function fetchSite() {
   const [id, secret] = process.env.GHOST_ADMIN_API_KEY.split(':');
-  const siteRes = await fetch(`${process.env.GHOST_URL}/ghost/api/admin/site/`, {
-    headers: { Authorization: `Ghost ${await signJWT(id, secret)}` }
+  const res = await fetch(`${process.env.GHOST_URL}/ghost/api/admin/site/`, {
+    headers: { Authorization: `Ghost ${signJWT(id, secret)}` }
   });
-  const siteData = await siteRes.json();
-  const site = {
-    title: siteData.site?.title || '',
-    description: siteData.site?.description || '',
+  const data = await res.json();
+  return {
+    title: data.site?.title || '',
+    description: data.site?.description || '',
     url: process.env.GHOST_URL,
   };
-  console.log(`      站点: ${site.title} (${site.url})`);
+}
 
-  console.log(`[2/5] 拉取文章: ${slug}`);
-  const post = await ghost.posts.read(
-    { slug },
-    { formats: ['html'], include: 'tags,authors' }
-  );
-  console.log(`      标题: "${post.title}"`);
+function savePreview(slug, html) {
+  const dir = resolve('./previews');
+  mkdirSync(dir, { recursive: true });
+  const file = join(dir, `${slug}.html`);
+  // 包一层完整 HTML 方便浏览器直接打开
+  const full = `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Preview: ${slug}</title></head><body>${html}</body></html>`;
+  writeFileSync(file, full, 'utf-8');
+  return file;
+}
 
-  const styleHint = await ask('\n风格描述（直接回车使用默认风格）: ');
+async function writeBack(post, html) {
+  const existingTags = (post.tags || []).filter(t => t.name !== '#custom-ui');
+  await ghost.posts.edit({
+    id: post.id,
+    updated_at: post.updated_at,
+    codeinjection_head: html,
+    tags: [...existingTags, { name: '#custom-ui' }]
+  });
+}
 
-  console.log(`\n[3/5] 构造 prompt...`);
+// ── 模式 A：AI 生成 → 本地预览 → 确认回写 ──
+async function modeGenerate(slug, site, post) {
+  const styleHint = await ask('风格描述（直接回车使用默认风格）: ');
+  console.log('\n[3/5] 构造 prompt...');
   const prompt = buildPrompt(post, site, styleHint);
 
-  console.log(`[4/5] 调用 AI 生成 HTML...`);
+  console.log('[4/5] 调用 AI 生成 HTML...');
   const completion = await ai.chat.completions.create({
     model: process.env.OPENAI_MODEL || 'gpt-4o',
     max_tokens: 8192,
     messages: [{ role: 'user', content: prompt }]
   });
-
   const raw = completion.choices[0].message.content;
-  const generatedHTML = raw.replace(/^```html\n?/, '').replace(/\n?```$/, '').trim();
+  const html = raw.replace(/^```html\n?/, '').replace(/\n?```$/, '').trim();
 
-  console.log(`[5/5] 写回 Ghost...`);
-  const existingTags = (post.tags || []).filter(t => t.name !== '#custom-ui');
-  await ghost.posts.edit({
-    id: post.id,
-    updated_at: post.updated_at,
-    codeinjection_head: generatedHTML,
-    tags: [...existingTags, { name: '#custom-ui' }]
-  });
+  const previewFile = savePreview(slug, html);
+  console.log(`\n[5/5] 预览文件已生成：`);
+  console.log(`      ${previewFile}`);
+  console.log(`      用浏览器打开确认效果\n`);
 
-  console.log(`\n✓ 完成: ${post.title}`);
+  const confirm = await ask('确认回写到 Ghost？(y/N): ');
+  if (confirm.toLowerCase() === 'y') {
+    await writeBack(post, html);
+    console.log(`\n✓ 已回写: ${post.title}`);
+    console.log(`  预览: ${site.url}/${post.slug}/`);
+  } else {
+    console.log('\n已取消。HTML 保留在 previews/ 目录，可修改后用 --file 模式回写。');
+  }
+}
+
+// ── 模式 B：直接上传本地 HTML 回写 ──
+async function modeFile(slug, site, post, filePath) {
+  const html = readFileSync(resolve(filePath), 'utf-8')
+    // 如果是完整 HTML 文件，提取 body 内容
+    .replace(/^[\s\S]*<body[^>]*>/i, '')
+    .replace(/<\/body>[\s\S]*$/i, '')
+    .trim();
+
+  console.log(`[3/3] 回写到 Ghost...`);
+  await writeBack(post, html);
+  console.log(`\n✓ 已回写: ${post.title}`);
   console.log(`  预览: ${site.url}/${post.slug}/`);
+}
+
+async function main() {
+  const args = process.argv.slice(2);
+  const slug = args[0];
+  const fileIdx = args.indexOf('--file');
+  const filePath = fileIdx !== -1 ? args[fileIdx + 1] : null;
+
+  if (!slug) {
+    console.log('用法:');
+    console.log('  node generate-ui.js <slug>              AI 生成，本地预览后确认回写');
+    console.log('  node generate-ui.js <slug> --file <path>  直接上传本地 HTML 回写');
+    process.exit(1);
+  }
+
+  console.log('[1/5] 拉取站点信息...');
+  const site = await fetchSite();
+  console.log(`      站点: ${site.title} (${site.url})`);
+
+  console.log(`[2/5] 拉取文章: ${slug}`);
+  const post = await ghost.posts.read({ slug }, { formats: ['html'], include: 'tags,authors' });
+  console.log(`      标题: "${post.title}"\n`);
+
+  if (filePath) {
+    await modeFile(slug, site, post, filePath);
+  } else {
+    await modeGenerate(slug, site, post);
+  }
 }
 
 function buildPrompt(post, site, styleHint) {
@@ -116,15 +174,7 @@ ${styleDesc}
 8. 只输出代码，不要任何解释文字`;
 }
 
-// CLI 入口
-const slug = process.argv[2];
-if (!slug) {
-  console.error('用法: node generate-ui.js <post-slug>');
-  console.error('示例: node generate-ui.js my-first-post');
-  process.exit(1);
-}
-
-generateUI(slug).catch(err => {
+main().catch(err => {
   console.error('错误:', err.message);
   process.exit(1);
 });
