@@ -19,24 +19,17 @@ Traditional blogs use the same UI for every post. This theme breaks that convent
 - 地下画廊风格首页，暗色系艺术展览大厅
 - 每篇文章可拥有完全独立的 AI 生成页面
 - 支持普通文章模式（默认主题布局）与 AI 全量接管模式
+- AI 生成前自动分析文章风格并给出推荐，用户可直接采用或修改
 - 分类页、独立页面完整支持
 - 附带 AI 生成脚本，一条命令生成并写回 Ghost
-
----
-
-- Underground gallery style homepage, dark art exhibition hall
-- Each post can have a fully independent AI-generated page
-- Supports both default layout mode and AI full-takeover mode
-- Full support for tag pages and static pages
-- Includes an AI generation script — one command to generate and write back to Ghost
 
 ---
 
 ## 环境要求 / Requirements
 
 - Ghost >= 6.0.0
-- Node.js >= 18 （用于 AI 生成脚本 / for AI generation script）
-- Anthropic API Key
+- Node.js >= 18（用于 AI 生成脚本 / for AI generation script）
+- OpenAI API Key（或兼容 OpenAI 接口的服务）
 
 ---
 
@@ -61,10 +54,14 @@ cp .env.example .env
 ```
 GHOST_URL=https://your-ghost-site.com
 GHOST_ADMIN_API_KEY=your-admin-api-key
-ANTHROPIC_API_KEY=your-anthropic-api-key
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_API_KEY=your-api-key
+OPENAI_MODEL=gpt-4o
 ```
 
 > Ghost Admin API Key: Ghost Admin → Settings → Integrations → Add custom integration
+
+> `OPENAI_BASE_URL` 支持任何兼容 OpenAI 接口的服务（如 Azure、本地模型等）
 
 ---
 
@@ -72,21 +69,23 @@ ANTHROPIC_API_KEY=your-anthropic-api-key
 
 写完一篇文章后，运行脚本生成 AI 页面：
 
-After writing a post, run the script to generate its AI page:
-
 ```bash
+# 完整流程：AI 分析风格 → 生成 HTML → 本地预览 → 确认写回
 node scripts/generate-ui.js your-post-slug
+
+# 直接上传本地写好的 HTML
+node scripts/generate-ui.js your-post-slug --file path/to/page.html
+
+# 只生成 prompt 文件，不调用 AI
+node scripts/generate-ui.js your-post-slug --prompt-only
 ```
 
-脚本会自动：
-1. 拉取文章内容
-2. 调用 Claude 生成完整 HTML 页面
-3. 写回 Ghost，并打上 `#custom-ui` tag
+默认模式脚本会自动：
 
-The script will automatically:
-1. Fetch the post content
-2. Call Claude to generate a complete HTML page
-3. Write back to Ghost and add the `#custom-ui` tag
+1. 拉取文章内容
+2. **AI 分析文章，推荐视觉风格**（可回车采用或手动修改）
+3. 调用 AI 生成完整 HTML 页面
+4. 保存本地预览文件，确认后写回 Ghost
 
 ---
 
@@ -94,13 +93,14 @@ The script will automatically:
 
 ```
 ├── theme/                  Ghost 主题文件
-│   ├── index.hbs           首页
-│   ├── post.hbs            文章页（双模式）
+│   ├── index.hbs           首页（画廊大厅）
+│   ├── post.hbs            文章页（普通模式）
+│   ├── custom-artshow.hbs  文章页（AI 接管模式）
 │   ├── page.hbs            独立页面
 │   ├── tag.hbs             分类页
 │   ├── default.hbs         基础布局
 │   ├── error.hbs           错误页
-│   ├── partials/           局部模板
+│   ├── partials/           局部模板（header, footer, card-*）
 │   └── assets/             CSS / JS
 ├── scripts/                AI 生成脚本
 │   ├── generate-ui.js      主脚本
