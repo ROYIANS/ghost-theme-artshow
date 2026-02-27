@@ -88,9 +88,11 @@
         {{> "card-main-exhibit"}}
       {{/foreach}}
       {{else}}
-      {{#foreach ../posts limit="1"}}
-        {{> "card-main-exhibit"}}
-      {{/foreach}}
+      {{#get "posts" limit="1"}}
+        {{#foreach posts}}
+          {{> "card-main-exhibit"}}
+        {{/foreach}}
+      {{/get}}
     {{/get}}
 
     {{!-- Regular Exhibits: 2-column grid --}}
