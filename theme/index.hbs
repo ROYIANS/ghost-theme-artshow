@@ -82,13 +82,25 @@
       </div>
     </div>
 
-    {{#foreach posts}}
-      {{#if @first}}
-        {{> "card-wide"}}
+    {{!-- Main Exhibit: featured post first, fallback to latest --}}
+    {{#get "posts" filter="featured:true" limit="1"}}
+      {{#foreach posts}}
+        {{> "card-main-exhibit"}}
+      {{/foreach}}
       {{else}}
-        {{> "card-row"}}
-      {{/if}}
+      {{#foreach ../posts limit="1"}}
+        {{> "card-main-exhibit"}}
+      {{/foreach}}
+    {{/get}}
+
+    {{!-- Regular Exhibits: 2-column grid --}}
+    <div class="exhibit-grid">
+    {{#foreach posts}}
+      {{#unless @first}}
+        {{> "card-exhibit"}}
+      {{/unless}}
     {{/foreach}}
+    </div>
 
     <div class="pager">
       {{#prev_url}}<a class="pg-prev" href="{{prev_url}}">← PREV</a>{{/prev_url}}
