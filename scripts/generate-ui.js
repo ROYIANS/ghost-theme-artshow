@@ -56,12 +56,11 @@ function savePreview(slug, html) {
 }
 
 async function writeBack(post, html) {
-  const existingTags = (post.tags || []).filter(t => t.name !== '#custom-ui');
   await ghost.posts.edit({
     id: post.id,
     updated_at: post.updated_at,
     codeinjection_head: html,
-    tags: [...existingTags, { name: '#custom-ui' }]
+    custom_template: 'custom-artshow',
   });
 }
 
