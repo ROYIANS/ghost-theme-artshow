@@ -2,7 +2,17 @@ import GhostAdminAPI from '@tryghost/admin-api';
 import OpenAI from 'openai';
 import { config } from 'dotenv';
 import * as readline from 'readline';
+import { createHmac } from 'crypto';
 config();
+
+// Ghost Admin API JWT 签名
+function signJWT(id, secret) {
+  const now = Math.floor(Date.now() / 1000);
+  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT', kid: id })).toString('base64url');
+  const payload = Buffer.from(JSON.stringify({ iat: now, exp: now + 300, aud: '/admin/' })).toString('base64url');
+  const sig = createHmac('sha256', Buffer.from(secret, 'hex')).update(`${header}.${payload}`).digest('base64url');
+  return `${header}.${payload}.${sig}`;
+}
 
 const ghost = new GhostAdminAPI({
   url: process.env.GHOST_URL,
@@ -22,10 +32,14 @@ function ask(question) {
 
 async function generateUI(slug) {
   console.log(`[1/5] 拉取站点信息...`);
-  const settings = await ghost.settings.browse();
+  const [id, secret] = process.env.GHOST_ADMIN_API_KEY.split(':');
+  const siteRes = await fetch(`${process.env.GHOST_URL}/ghost/api/admin/site/`, {
+    headers: { Authorization: `Ghost ${await signJWT(id, secret)}` }
+  });
+  const siteData = await siteRes.json();
   const site = {
-    title: settings.find(s => s.key === 'title')?.value || '',
-    description: settings.find(s => s.key === 'description')?.value || '',
+    title: siteData.site?.title || '',
+    description: siteData.site?.description || '',
     url: process.env.GHOST_URL,
   };
   console.log(`      站点: ${site.title} (${site.url})`);
