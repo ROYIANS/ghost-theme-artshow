@@ -1,0 +1,31 @@
+<div class="aw-wide">
+  <div class="aww-main">
+    <div class="aww-kicker">
+      {{#if primary_tag}}
+      <span class="aww-tag" style="color:var(--acid);border-color:rgba(212,242,60,.3)">{{primary_tag.name}}</span>
+      {{/if}}
+      <span class="aww-date">{{date format="YYYY.MM.DD"}}</span>
+    </div>
+    <h2 class="aww-title"><a href="{{url}}">{{title}}</a></h2>
+    <p class="aww-excerpt">{{excerpt words="30"}}</p>
+    <div class="aww-foot">
+      <span class="aww-read">→ 进入展品</span>
+    </div>
+  </div>
+  <div class="aww-side">
+    <div class="aww-side-canvas">
+      {{#if feature_image}}
+      <img src="{{feature_image}}" alt="{{title}}" style="width:100%;height:100%;object-fit:cover;opacity:.6;">
+      {{else}}
+      <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+        <span style="font-family:'Unbounded',sans-serif;font-size:48px;font-weight:900;color:rgba(255,255,255,.06);">{{excerpt words="1"}}</span>
+      </div>
+      {{/if}}
+    </div>
+    <div class="aww-side-info">
+      <div class="awsi-l">EXHIBIT</div>
+      <div class="awsi-s">{{title}}</div>
+    </div>
+  </div>
+  <span class="aww-arrow">→</span>
+</div>

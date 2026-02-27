@@ -1,0 +1,20 @@
+<header class="site-header">
+  <div class="sh-logo">
+    <div class="sh-logo-mark">梦</div>
+    <div class="sh-logo-text">
+      {{@site.title}}
+      <small>writing exhibition</small>
+    </div>
+  </div>
+  <ul class="sh-nav">
+    {{#foreach navigation}}
+    <li class="{{#if current}}on{{/if}}"><a href="{{url}}">{{label}}</a></li>
+    {{/foreach}}
+  </ul>
+  <div class="sh-right">
+    <a class="sh-action" href="/rss/">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
+      RSS
+    </a>
+  </div>
+</header>

@@ -1,0 +1,13 @@
+<div class="aw-card">
+  <div class="ac-num">{{@index}}</div>
+  <div class="ac-stripe" style="background:{{#if primary_tag}}var(--acid){{else}}var(--ghost){{/if}}"></div>
+  <div class="ac-kicker">
+    {{#if primary_tag}}<span style="color:var(--acid)">{{primary_tag.name}}</span>{{/if}}
+  </div>
+  <h3 class="ac-title"><a href="{{url}}">{{title}}</a></h3>
+  <p class="ac-excerpt">{{excerpt words="20"}}</p>
+  <div class="ac-foot">
+    <span class="ac-date">{{date format="YYYY.MM.DD"}}</span>
+    <span class="ac-read">→</span>
+  </div>
+</div>

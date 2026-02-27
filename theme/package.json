@@ -1,0 +1,10 @@
+{
+  "name": "xiaomengtao-theme",
+  "description": "小梦岛 — 地下画廊博客主题",
+  "version": "1.0.0",
+  "engines": { "ghost": ">=6.0.0" },
+  "config": {
+    "posts_per_page": 10,
+    "image_sizes": {}
+  }
+}

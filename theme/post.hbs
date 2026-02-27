@@ -1,0 +1,28 @@
+{{!< default}}
+
+{{#post}}
+  {{#has tag="#custom-ui"}}
+    {{! AI 全量接管模式 }}
+    {{{codeinjection_head}}}
+  {{else}}
+    {{! 普通文章模式 }}
+    {{> header}}
+    <main class="post-default">
+      <div class="post-header">
+        <div class="post-kicker">
+          {{#if primary_tag}}{{primary_tag.name}} · {{/if}}{{date format="YYYY.MM.DD"}}
+        </div>
+        <h1 class="post-title">{{title}}</h1>
+        <div class="post-meta">{{reading_time}} min read</div>
+      </div>
+      <div class="post-divider"></div>
+      <section class="post-content">
+        {{content}}
+      </section>
+      <div class="post-back">
+        <a href="/">← 返回展览大厅</a>
+      </div>
+    </main>
+    {{> footer}}
+  {{/has}}
+{{/post}}

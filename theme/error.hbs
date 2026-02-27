@@ -1,0 +1,10 @@
+{{!< default}}
+
+{{> header}}
+<div style="min-height:80vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:24px;text-align:center;padding:60px 32px;">
+  <div style="font-family:'Unbounded',sans-serif;font-weight:900;font-size:clamp(80px,15vw,160px);line-height:1;color:rgba(255,255,255,.06);">{{statusCode}}</div>
+  <div style="font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--text3);">EXHIBIT NOT FOUND</div>
+  <h1 style="font-family:'Noto Sans SC',sans-serif;font-weight:900;font-size:20px;color:var(--text);">{{message}}</h1>
+  <a href="/" style="font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--text3);border:1px solid var(--ghost);padding:10px 24px;transition:.15s;">← 返回展览大厅</a>
+</div>
+{{> footer}}
